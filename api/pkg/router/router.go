@@ -12,10 +12,11 @@ import (
 // GetRouter handles routing.
 func GetRouter(app *application.Application) *mux.Router {
 	router := mux.NewRouter()
+	api := router.PathPrefix("/api/v1").Subrouter()
 
-	router.HandleFunc("/api/v1/users", handlers.GetUsers(app)).Methods(http.MethodGet)
+	api.HandleFunc("/users", handlers.GetUsers(app)).Methods(http.MethodGet)
 
-	router.Use(middleware.LoggingMiddleware)
+	api.Use(middleware.LoggingMiddleware)
 
-	return router
+	return api
 }
