@@ -4,8 +4,6 @@ import (
 	"github.com/contractGuru/pkg/application"
 	"github.com/contractGuru/pkg/exithandler"
 	"github.com/contractGuru/pkg/logger"
-	"github.com/contractGuru/pkg/router"
-	"github.com/contractGuru/pkg/server"
 	"github.com/joho/godotenv"
 )
 
@@ -22,22 +20,16 @@ func main() {
 		logger.Error.Fatal(err.Error())
 	}
 
-	srv := server.
-		GetServer().
-		WithAddr(app.Cfg.GetAPIPort()).
-		WithRouter(router.GetRouter(app)).
-		WithErrLogger(logger.Error)
-
 	go func() {
 		logger.Info.Printf("Starting server. Listening at port %s\n", app.Cfg.GetAPIPort())
 
-		if err := srv.StartServer(); err != nil {
+		if err := app.Srv.StartServer(); err != nil {
 			logger.Error.Fatal(err.Error())
 		}
 	}()
 
 	exithandler.Exit(func() {
-		if err := srv.CloseServer(); err != nil {
+		if err := app.Srv.CloseServer(); err != nil {
 			logger.Error.Println(err.Error())
 		}
 
