@@ -23,7 +23,7 @@ func main() {
 	go func() {
 		logger.Info.Printf("Starting server. Listening at port %s\n", app.Cfg.GetAPIPort())
 
-		if err := app.Srv.StartServer(); err != nil {
+		if err := app.Srv.StartServerTLS(); err != nil {
 			logger.Error.Fatal(err.Error())
 		}
 	}()

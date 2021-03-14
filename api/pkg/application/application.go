@@ -18,21 +18,31 @@ type Application struct {
 // GetApp captures env variables, initializes server & establishes DB connection then returns reference to all.
 func GetApp() (*Application, error) {
 	cfg := config.GetConfig()
+	cert, err := cfg.GetCert()
+
+	if err != nil {
+		return nil, err
+	}
 
 	db, err := db.GetDB(cfg.GetDBConnStr())
 
-	srv := server.
-		GetServer().
-		WithAddr(cfg.GetAPIPort()).
-		WithRouter(router.GetRouter(db)).
-		WithErrLogger(logger.Error)
+	if err != nil {
+		return nil, err
+	}
+
+	srv, err := server.GetServer(
+		server.WithAddr(cfg.GetAPIPort()),
+		server.WithRouter(router.GetRouter(db)),
+		server.WithErrLogger(logger.Error),
+		server.WithTLS(cert),
+	)
 
 	if err != nil {
 		return nil, err
 	}
 
 	return &Application{
-		DB: db,
+		DB:  db,
 		Cfg: cfg,
 		Srv: srv,
 	}, nil

@@ -1,9 +1,12 @@
 package config
 
 import (
+	"crypto/tls"
 	"flag"
 	"fmt"
 	"os"
+
+	"github.com/contractGuru/pkg/logger"
 )
 
 // Config struct stores configuration values which will be read from env file.
@@ -18,6 +21,8 @@ type Config struct {
 	dbOptVal   string
 	dbLoc      string
 	dbLocVal   string
+	cert       string
+	key        string
 }
 
 // GetConfig creates a pointer to Config using env variables as default values.
@@ -34,6 +39,8 @@ func GetConfig() *Config {
 	flag.StringVar(&cfg.dbLoc, "dbloc", os.Getenv("DB_LOC_TIME"), "DB loc time")
 	flag.StringVar(&cfg.dbLocVal, "dblocval", os.Getenv("DB_LOC_TIME_OPT"), "DB loc time value")
 	flag.StringVar(&cfg.port, "port", os.Getenv("PORT"), "server port")
+	flag.StringVar(&cfg.cert, "cert", os.Getenv("CERT"), "certificate")
+	flag.StringVar(&cfg.key, "key", os.Getenv("KEY"), "key")
 
 	flag.Parse()
 
@@ -67,4 +74,16 @@ func (c *Config) GetAPIPort() string {
 	listenAt := fmt.Sprintf(":%s", c.port)
 
 	return listenAt
+}
+
+// GetCert returns certificate.
+func (c *Config) GetCert() (*tls.Certificate, error) {
+	cert, err := tls.LoadX509KeyPair(c.cert, c.key)
+
+	if err != nil {
+		logger.Error.Println(err.Error())
+		return nil, err
+	}
+
+	return &cert, nil
 }
