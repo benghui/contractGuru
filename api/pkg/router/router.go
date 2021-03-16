@@ -14,7 +14,7 @@ func GetRouter(db *db.DB) *mux.Router {
 	router := mux.NewRouter()
 	api := router.PathPrefix("/api/v1").Subrouter()
 
-	api.HandleFunc("/users", handlers.GetUsers(db)).Methods(http.MethodGet)
+	api.HandleFunc("/users/login", handlers.LoginUser(db)).Methods(http.MethodPost)
 
 	api.Use(middleware.LoggingMiddleware)
 
