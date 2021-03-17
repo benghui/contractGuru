@@ -55,6 +55,27 @@ func LoginUser(db *db.DB) http.HandlerFunc {
 	}
 }
 
+func LogoutUser(db *db.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+
+		session, err := db.Store.Get(r, "session")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		session.Values["id"] = nil
+		session.Values["auth"] = nil
+		session.Options.MaxAge = -1
+
+		if err = session.Save(r, w); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
 func passwordCheck(db *db.DB, username, password string) (map[string]interface{}, error) {
 
 	userData := make(map[string]interface{})
