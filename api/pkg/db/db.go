@@ -1,10 +1,9 @@
 package db
 
 import (
+	"encoding/base64"
 	"os"
-	"strconv"
 
-	"github.com/gorilla/securecookie"
 	"github.com/wader/gormstore/v2"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -24,18 +23,8 @@ func GetDB(connStr string) (*DB, error) {
 		return nil, err
 	}
 
-	aKey, err := strconv.Atoi(os.Getenv("AKEY"))
-	if err != nil {
-		return nil, err
-	}
-
-	eKey, err := strconv.Atoi(os.Getenv("EKEY"))
-	if err != nil {
-		return nil, err
-	}
-
-	authKey := securecookie.GenerateRandomKey(aKey)
-	encryptionKey := securecookie.GenerateRandomKey(eKey)
+	authKey := encode([]byte(os.Getenv("AKEY")))
+	encryptionKey := encode([]byte(os.Getenv("EKEY")))
 
 	store := gormstore.NewOptions(db, gormstore.Options{}, authKey, encryptionKey)
 
@@ -66,4 +55,10 @@ func get(connStr string) (*gorm.DB, error) {
 	}
 
 	return db, nil
+}
+
+func encode(value []byte) []byte {
+	encoded := make([]byte, base64.URLEncoding.EncodedLen(len(value)))
+	base64.URLEncoding.Encode(encoded, value)
+	return encoded
 }
