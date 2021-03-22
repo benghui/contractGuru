@@ -6,7 +6,7 @@ import (
 )
 
 // Users contain parameters for user
-type Users struct {
+type User struct {
 	UserID    int    `json:"user_id"`
 	Username  string `json:"username"`
 	Password  string `json:"password"`
@@ -14,6 +14,6 @@ type Users struct {
 	Lastname  string `json:"lastname"`
 }
 
-func (u *Users) Prepare() {
+func (u *User) Prepare() {
 	u.Username = html.EscapeString(strings.TrimSpace(u.Username))
 }

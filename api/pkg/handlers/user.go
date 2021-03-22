@@ -29,7 +29,7 @@ func LoginUser(db *db.DB) http.HandlerFunc {
 			return
 		}
 
-		user := models.Users{}
+		user := models.User{}
 
 		if err = json.Unmarshal(body, &user); err != nil {
 			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
@@ -55,6 +55,7 @@ func LoginUser(db *db.DB) http.HandlerFunc {
 	}
 }
 
+// LogoutUser revokes session.
 func LogoutUser(db *db.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
@@ -80,10 +81,11 @@ func passwordCheck(db *db.DB, username, password string) (map[string]interface{}
 
 	userData := make(map[string]interface{})
 
-	user := models.Users{}
+	user := models.User{}
 
 	if err := db.Grm.Debug().
-		Model(models.Users{}).
+		Table("user").
+		Model(models.User{}).
 		Select("user_id", "username", "password").
 		Where("username = ?", username).
 		Take(&user).
