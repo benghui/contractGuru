@@ -15,8 +15,6 @@ import (
 // LoginUser authenticates a user.
 func LoginUser(db *db.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		defer r.Body.Close()
-
 		session, err := db.Store.Get(r, "session")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -58,8 +56,6 @@ func LoginUser(db *db.DB) http.HandlerFunc {
 // LogoutUser revokes session.
 func LogoutUser(db *db.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		defer r.Body.Close()
-
 		session, err := db.Store.Get(r, "session")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -78,7 +74,6 @@ func LogoutUser(db *db.DB) http.HandlerFunc {
 }
 
 func passwordCheck(db *db.DB, username, password string) (map[string]interface{}, error) {
-
 	userData := make(map[string]interface{})
 
 	user := models.User{}
