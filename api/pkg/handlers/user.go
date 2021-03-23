@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/contractGuru/pkg/db"
@@ -17,20 +16,14 @@ func LoginUser(db *db.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		session, err := db.Store.Get(r, "session")
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		body, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+			respondError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
 		user := models.User{}
 
-		if err = json.Unmarshal(body, &user); err != nil {
-			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+		if err = json.NewDecoder(r.Body).Decode(&user); err != nil {
+			respondError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -39,7 +32,7 @@ func LoginUser(db *db.DB) http.HandlerFunc {
 		userData, err := passwordCheck(db, user.Username, user.Password)
 
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+			respondError(w, http.StatusUnauthorized, err.Error())
 			return
 		}
 
@@ -47,7 +40,7 @@ func LoginUser(db *db.DB) http.HandlerFunc {
 		session.Values["auth"] = true
 
 		if err = session.Save(r, w); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			respondError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 	}
@@ -58,7 +51,7 @@ func LogoutUser(db *db.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		session, err := db.Store.Get(r, "session")
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			respondError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
@@ -67,12 +60,13 @@ func LogoutUser(db *db.DB) http.HandlerFunc {
 		session.Options.MaxAge = -1
 
 		if err = session.Save(r, w); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			respondError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 	}
 }
 
+// passwordCheck verifies password.
 func passwordCheck(db *db.DB, username, password string) (map[string]interface{}, error) {
 	userData := make(map[string]interface{})
 
