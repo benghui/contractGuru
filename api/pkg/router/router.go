@@ -18,6 +18,7 @@ func GetRouter(db *db.DB) *mux.Router {
 	api.HandleFunc("/users/logout", handlers.LogoutUser(db)).Methods(http.MethodPost)
 
 	api.HandleFunc("/requests", handlers.GetPendingRequests(db)).Methods(http.MethodGet)
+	api.HandleFunc("/requests", handlers.CreateRequest(db)).Methods(http.MethodPost)
 
 	api.Use(middleware.LoggingMiddleware)
 
