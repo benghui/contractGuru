@@ -16,6 +16,7 @@ func GetRouter(db *db.DB) *mux.Router {
 
 	api.HandleFunc("/users/login", handlers.LoginUser(db)).Methods(http.MethodPost)
 	api.HandleFunc("/users/logout", handlers.LogoutUser(db)).Methods(http.MethodPost)
+	api.HandleFunc("/users/{id:[0-9]+}", handlers.GetUserInfo(db)).Methods(http.MethodGet)
 
 	api.HandleFunc("/requests", handlers.GetPendingRequests(db)).Methods(http.MethodGet)
 	api.HandleFunc("/requests", handlers.CreateRequest(db)).Methods(http.MethodPost)
