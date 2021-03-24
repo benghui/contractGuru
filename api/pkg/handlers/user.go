@@ -113,6 +113,11 @@ func GetUserInfo(db *db.DB) http.HandlerFunc {
 			return
 		}
 
+		if userinfo.UserID == 0 || userinfo.BuID == 0 || userinfo.UserRoleID == 0 {
+			respondError(w, http.StatusNoContent, "")
+			return
+		}
+
 		respondJSON(w, http.StatusOK, userinfo)
 	}
 }
