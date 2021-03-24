@@ -18,7 +18,7 @@ func GetPendingRequests(db *db.DB) http.HandlerFunc {
 		}
 
 		if session.Values["auth"] != true {
-			respondError(w, http.StatusUnauthorized, err.Error())
+			respondError(w, http.StatusUnauthorized, "Unauthorized")
 			return
 		}
 
@@ -26,6 +26,8 @@ func GetPendingRequests(db *db.DB) http.HandlerFunc {
 
 		if err := db.Grm.Debug().
 			Table("request").
+			Where("current_state_id != ?", 4).
+			Limit(10).
 			Find(&request).
 			Error; err != nil {
 			respondError(w, http.StatusInternalServerError, err.Error())
@@ -39,34 +41,39 @@ func GetPendingRequests(db *db.DB) http.HandlerFunc {
 // CreateRequest handles inserting new contract request entry.
 func CreateRequest(db *db.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, err := db.Store.Get(r, "session")
-		if err != nil {
-			respondError(w, http.StatusInternalServerError, err.Error())
+		if r.Header.Get("Content-type") == "application/json" {
+			session, err := db.Store.Get(r, "session")
+			if err != nil {
+				respondError(w, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			if session.Values["auth"] != true {
+				respondError(w, http.StatusUnauthorized, "Unauthorized")
+				return
+			}
+
+			newRequest := &models.Request{}
+
+			if err = json.NewDecoder(r.Body).Decode(newRequest); err != nil {
+				respondError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+
+			newRequest.Prepare()
+
+			if err := db.Grm.Debug().
+				Table("request").
+				Omit("RequestID").
+				Create(&newRequest).
+				Error; err != nil {
+				respondError(w, http.StatusInternalServerError, err.Error())
+				return
+			}
+			respondJSON(w, http.StatusOK, nil)
+		} else {
+			respondError(w, http.StatusBadRequest, "Invalid content-type")
 			return
 		}
-
-		if session.Values["auth"] != true {
-			respondError(w, http.StatusUnauthorized, "Unauthorized")
-			return
-		}
-
-		newRequest := &models.Request{}
-
-		if err = json.NewDecoder(r.Body).Decode(newRequest); err != nil {
-			respondError(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		newRequest.Prepare()
-
-		if err := db.Grm.Debug().
-			Table("request").
-			Omit("RequestID").
-			Create(&newRequest).
-			Error; err != nil {
-			respondError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-		respondJSON(w, http.StatusOK, nil)
 	}
 }
