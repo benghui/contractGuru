@@ -22,15 +22,21 @@ func GetPendingRequests(db *db.DB) http.HandlerFunc {
 			return
 		}
 
-		request := []models.Request{}
+		request := &[]models.Request{}
+		bu := session.Values["bu"].(int)
 
 		if err := db.Grm.Debug().
 			Table("request").
-			Where("current_state_id != ?", 4).
+			Where("current_state_id != ? AND bu_id=?", 4, bu).
 			Limit(10).
 			Find(&request).
 			Error; err != nil {
 			respondError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		if len(*request) == 0 {
+			respondError(w, http.StatusNoContent, "")
 			return
 		}
 
