@@ -24,7 +24,10 @@ func GetPendingRequestActions(db *db.DB) http.HandlerFunc {
 		}
 
 		action := &[]models.Action{}
+
 		bu := session.Values["bu"].(int)
+		role := session.Values["role"].(int)
+
 		params := mux.Vars(r)["id"]
 		requestId, err := strconv.Atoi(params)
 		if err != nil {
@@ -37,8 +40,9 @@ func GetPendingRequestActions(db *db.DB) http.HandlerFunc {
 				FROM request, transition, transition_action AS ta
 				WHERE request.current_state_id=transition.start_state_id
 				AND request.bu_id=?
+				AND transition.user_role_id=?
 				AND request.request_id=?
-				AND transition.transition_id=ta.transition_id`, bu, requestId).
+				AND transition.transition_id=ta.transition_id`, bu, role, requestId).
 			Scan(&action).
 			Error; err != nil {
 			respondError(w, http.StatusInternalServerError, err.Error())
