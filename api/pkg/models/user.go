@@ -14,6 +14,12 @@ type User struct {
 	Lastname  string `json:"lastname"`
 }
 
+type UserInfo struct {
+	UserID     int `json:"user_id"`
+	UserRoleID int `json:"user_role_id"`
+	BuID       int `json:"bu_id"`
+}
+
 func (u *User) Prepare() {
 	u.Username = html.EscapeString(strings.TrimSpace(u.Username))
 }
