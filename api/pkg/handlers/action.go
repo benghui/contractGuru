@@ -36,13 +36,14 @@ func GetPendingRequestActions(db *db.DB) http.HandlerFunc {
 		}
 
 		if err := db.Grm.Debug().
-			Raw(`SELECT ta.action_id, request.finance_flag
-				FROM request, transition, transition_action AS ta
+			Raw(`SELECT action.action_name, request.finance_flag
+				FROM request, transition, transition_action AS ta, action
 				WHERE request.current_state_id=transition.start_state_id
 				AND request.bu_id=?
 				AND transition.user_role_id=?
 				AND request.request_id=?
-				AND transition.transition_id=ta.transition_id`, bu, role, requestId).
+				AND transition.transition_id=ta.transition_id
+				AND ta.action_id=action.action_id`, bu, role, requestId).
 			Scan(&action).
 			Error; err != nil {
 			respondError(w, http.StatusInternalServerError, err.Error())
