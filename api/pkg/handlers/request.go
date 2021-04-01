@@ -76,7 +76,7 @@ func CreateRequest(db *db.DB) http.HandlerFunc {
 				respondError(w, http.StatusInternalServerError, err.Error())
 				return
 			}
-			respondJSON(w, http.StatusOK, nil)
+			respondJSON(w, http.StatusCreated, "")
 		} else {
 			respondError(w, http.StatusBadRequest, "Invalid content-type")
 			return
