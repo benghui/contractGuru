@@ -22,7 +22,6 @@ func GetRouter(db *db.DB) *mux.Router {
 
 	api.HandleFunc("/requests/{id:[0-9]+}/actions", handlers.GetPendingRequestActions(db)).Methods(http.MethodGet)
 
-
 	api.Use(middleware.LoggingMiddleware)
 
 	return api
