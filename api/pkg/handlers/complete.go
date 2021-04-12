@@ -5,9 +5,10 @@ import (
 	"net/http"
 
 	"github.com/contractGuru/pkg/db"
+	"github.com/contractGuru/pkg/models"
 )
 
-//CreateCompletedContractData handles inserting new completed contract entry
+// CreateCompletedContractData handles creating new completed contract entry
 func CreateCompletedContractData(db *db.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Content-type") == "application/json" {
@@ -21,7 +22,7 @@ func CreateCompletedContractData(db *db.DB) http.HandlerFunc {
 				return
 			}
 
-			newCompletedData = &models.Completed{}
+			newCompletedData := &models.Completed{}
 
 			if err = json.NewDecoder(r.Body).Decode(newCompletedData); err != nil {
 				respondError(w, http.StatusBadRequest, err.Error())
@@ -35,7 +36,7 @@ func CreateCompletedContractData(db *db.DB) http.HandlerFunc {
 				respondError(w, http.StatusInternalServerError, err.Error())
 				return
 			}
-			respondJson(w, http.StatusOK, nil)
+			respondJSON(w, http.StatusOK, nil)
 		} else {
 			respondError(w, http.StatusBadRequest, "Invalid content type")
 			return
